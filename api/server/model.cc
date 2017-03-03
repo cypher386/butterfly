@@ -96,16 +96,18 @@ std::string Ip::str() const {
 }
 
 bool Ip::bytes(uint8_t *data) const {
-    if (data == nullptr)
+    if (data == nullptr) {
         return false;
-    if (type_ == Ip::V4)
+    }
+    if (type_ == Ip::V4) {
         memcpy(reinterpret_cast<void *>(data),
                reinterpret_cast<const void *>(data_), 4);
-    else if (type_ == Ip::V6)
+    } else if (type_ == Ip::V6) {
         memcpy(reinterpret_cast<void *>(data),
                reinterpret_cast<const void *>(data_), 16);
-    else
+    } else {
         return false;
+    }
     return true;
 }
 
@@ -154,8 +156,9 @@ std::string Mac::str() const {
 }
 
 bool Mac::bytes(uint8_t *data) const {
-    if (data == nullptr)
+    if (data == nullptr) {
         return false;
+    }
     memcpy(reinterpret_cast<void *>(data),
            reinterpret_cast<const void *>(data_), 6);
     return true;
@@ -171,19 +174,22 @@ Mac Mac::operator= (const std::string& a) {
 }
 
 bool Mac::set(std::string a) {
-    if (a.length() != 17)
+    if (a.length() != 17) {
         return false;
+    }
     const char *cstr = a.c_str();
     unsigned int addr[6];
     if (sscanf(cstr, "%2x:%2x:%2x:%2x:%2x:%2x",
                &addr[0], &addr[1], &addr[2],
-               &addr[3], &addr[4], &addr[5]) != 6)
+               &addr[3], &addr[4], &addr[5]) != 6) {
         return false;
+    }
     for (int i = 0; i < 6; i++) {
-        if (addr[i] < 0 || addr[i] > 255)
+        if (addr[i] < 0 || addr[i] > 255) {
             return false;
-        else
+        } else {
             data_[i] = addr[i];
+        }
     }
     mac_ = a;
     return true;

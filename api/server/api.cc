@@ -29,8 +29,9 @@
 #include "api/version.h"
 
 void API::process_request(const std::string &request, std::string *response) {
-    if (response == nullptr)
+    if (response == nullptr) {
         return;
+    }
     // Increment request counter
     app::stats.request_counter++;
 
@@ -97,8 +98,9 @@ void API::build_internal_error(std::string *response) {
 }
 
 void API::dispatch(const proto::Message &req, proto::Message *rep) {
-    if (rep == nullptr)
+    if (rep == nullptr) {
         return;
+    }
     // Put the current revision number of the protocol in response
     rep->set_revision(PROTOS_REVISION);
 
@@ -145,8 +147,10 @@ bool API::action_nic_update(const API::NicUpdate &update,
     if (itn == app::model.nics.end()) {
         std::string m = "NIC does not exist with id " + update.id;
         app::log.error(m);
-        if (error != nullptr)
+        if (error != nullptr) {
             error->description = m;
+        }
+
         return false;
     }
     // Get the nic
@@ -176,11 +180,13 @@ bool API::action_nic_update(const API::NicUpdate &update,
         need_anti_spoof_update = true;
     }
 
-    if (need_anti_spoof_update)
+    if (need_anti_spoof_update) {
         app::graph.nic_config_anti_spoof(n, n.ip_anti_spoof);
+    }
 
-    if (need_fw_update)
+    if (need_fw_update) {
         app::graph.fw_update(n);
+    }
 
     return true;
 }
@@ -205,15 +211,17 @@ bool API::action_nic_del(std::string id, app::Error *error) {
 
 bool API::action_nic_export(std::string id, std::string *data,
     app::Error *error) {
-    if (data == nullptr)
+    if (data == nullptr) {
         return false;
+    }
     // Do we have this NIC ?
     auto nic = app::model.nics.find(id);
     if (nic == app::model.nics.end()) {
         std::string m = "NIC does not exist with id " + id;
         app::log.error(m);
-        if (error != nullptr)
+        if (error != nullptr) {
             error->description = m;
+        }
         return false;
     }
 
@@ -224,15 +232,17 @@ bool API::action_nic_export(std::string id, std::string *data,
 
 bool API::action_nic_stats(std::string id, uint64_t *in, uint64_t *out,
     app::Error *error) {
-    if (in == nullptr || out == nullptr)
+    if (in == nullptr || out == nullptr) {
         return false;
+    }
 
     auto nic = app::model.nics.find(id);
     if (nic == app::model.nics.end()) {
         std::string m = "NIC does not exist with id " + id;
         app::log.error(m);
-        if (error != nullptr)
+        if (error != nullptr) {
             error->description = m;
+        }
         return false;
     }
 
@@ -303,8 +313,9 @@ void API::sg_update_rule_members(const app::Sg &modified_sg) {
              sg_it != nic.security_groups.end();
              sg_it++) {
             sg = app::model.security_groups.find(*sg_it);
-            if (sg == app::model.security_groups.end())
+            if (sg == app::model.security_groups.end()) {
                 continue;
+            }
 
             for (sg_end = sg->second.rules.end(),
                  rule_it = sg->second.rules.begin();
@@ -338,8 +349,9 @@ bool API::action_sg_add(const app::Sg &sg, app::Error *error) {
         app::log.warning(m);
         // Check if the securiy group content is the same.
         app::Sg &original_sg = itn->second;
-        if (sg == original_sg)
+        if (sg == original_sg) {
             return true;
+        }
         // If not, let's update model
         original_sg = sg;
     } else {

@@ -40,7 +40,8 @@ int sub_shutdown(int argc, char **argv, const GlobalOptions &options) {
         "}";
 
     proto::Messages res;
-    if (request(req, &res, options, false) || check_request_result(res))
+    if (request(req, &res, options, false) || check_request_result(res)) {
         return 1;
+    }
     return 0;
 }

@@ -39,8 +39,9 @@ APIServer::loop() {
     try {
         zmqpp::message request;
         zmqpp::message response;
-        if (!socket_->receive(request, true))
+        if (!socket_->receive(request, true)) {
             return;
+        }
         LOG_DEBUG_("ZMQ received a message");
         process(request, &response);
         LOG_DEBUG_("ZMQ send");
@@ -58,8 +59,9 @@ APIServer::run() {
     while (42) {
         loop();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        if (end_ != nullptr && *end_ == true)
+        if (end_ != nullptr && *end_ == true) {
             break;
+        }
     }
 }
 
@@ -78,8 +80,9 @@ APIServer::prepare() {
 
 void
 APIServer::static_loop(APIServer *me) {
-    if (me != NULL)
+    if (me != NULL) {
         me->run();
+    }
 }
 
 void

@@ -175,8 +175,9 @@ bool Config::missing_mandatory() {
         ret = true;
     }
 
-    if (ret)
+    if (ret) {
         app::log.error("missing mandatory configuration items");
+    }
     return ret;
 }
 
@@ -261,8 +262,9 @@ void Log::error(const std::string &message, ...) {
 bool load_config_file(std::string config_path) {
     CSimpleIniA ini;
     ini.SetUnicode();
-    if (ini.LoadFile(config_path.c_str()) != SI_OK)
+    if (ini.LoadFile(config_path.c_str()) != SI_OK) {
         return false;
+    }
     const char *v;
 
     v = ini.GetValue("general", "log-level", "_");
@@ -400,8 +402,9 @@ int init_cgroup(int multiplier) {
 }
 
 void app::set_cgroup() {
-  if (!app::config.tid)
+  if (!app::config.tid) {
     return;
+  }
   std::string setStr;
   std::string unsetOtherStr;
   std::ostringstream oss;
@@ -430,8 +433,9 @@ main(int argc, char *argv[]) {
         app::signal_register();
 
         // Check parameters
-        if (!app::config.parse_cmd(argc, argv))
+        if (!app::config.parse_cmd(argc, argv)) {
             return 0;
+        }
 
         // Set log level from options
         app::log.set_log_level(app::config.log_level);
@@ -455,8 +459,9 @@ main(int argc, char *argv[]) {
         APIServer server(app::config.api_endpoint, &app::request_exit);
         server.run_threaded();
 
-        while (!app::request_exit)
+        while (!app::request_exit) {
             std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
     } catch (std::exception & e) {
         LOG_ERROR_("%s", e.what());
     }

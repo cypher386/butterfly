@@ -40,8 +40,9 @@ int sub_status(int argc, char **argv, const GlobalOptions &options) {
         "}";
 
     proto::Messages res;
-    if (request(req, &res, options, false) || check_request_result(res))
+    if (request(req, &res, options, false) || check_request_result(res)) {
         return 1;
+    }
 
     MessageV0_Response res_0 = res.messages(0).message_0().response();
     if (!res_0.has_app_status()) {
@@ -49,13 +50,17 @@ int sub_status(int argc, char **argv, const GlobalOptions &options) {
         return 1;
     }
     MessageV0_AppStatusRes s = res_0.app_status();
-    if (s.has_start_date())
+    if (s.has_start_date()) {
         cout << "start date: " << to_string(s.start_date()) << endl;
-    if (s.has_current_date())
+    }
+    if (s.has_current_date()) {
         cout << "current date: " << to_string(s.current_date()) << endl;
-    if (s.has_request_counter())
+    }
+    if (s.has_request_counter()) {
         cout << "request counter: " << to_string(s.request_counter()) << endl;
-    if (s.has_graph_dot())
+    }
+    if (s.has_graph_dot()) {
         cout << "dot graph: " << endl << s.graph_dot() << endl;
+    }
     return 0;
 }

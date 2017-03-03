@@ -40,8 +40,9 @@ static int sub_sg_list(int argc, char **argv, const GlobalOptions &options) {
         "}";
 
     proto::Messages res;
-    if (request(req, &res, options, false) || check_request_result(res))
+    if (request(req, &res, options, false) || check_request_result(res)) {
         return 1;
+    }
 
     MessageV0_Response res_0 = res.messages(0).message_0().response();
     int size = res_0.sg_list_size();
@@ -74,8 +75,9 @@ static int sub_sg_add(int argc, char **argv, const GlobalOptions &options) {
     vector<string> sgs;
     for (int i = 3; i < argc; i++) {
         string a = string(argv[i]);
-        if (a[0] == '-')
+        if (a[0] == '-') {
             break;
+        }
         sgs.push_back(a);
     }
     if (!sgs.size()) {
@@ -122,8 +124,9 @@ static int sub_sg_del(int argc, char **argv, const GlobalOptions &options) {
     vector<string> sgs;
     for (int i = 3; i < argc; i++) {
         string a = string(argv[i]);
-        if (a[0] == '-')
+        if (a[0] == '-') {
             break;
+        }
         sgs.push_back(a);
     }
     if (!sgs.size()) {
@@ -204,8 +207,9 @@ static int sub_sg_rule_list(int argc, char **argv,
         "}";
 
     proto::Messages res;
-    if (request(req, &res, options, false) || check_request_result(res))
+    if (request(req, &res, options, false) || check_request_result(res)) {
         return 1;
+    }
 
     MessageV0_Response res_0 = res.messages(0).message_0().response();
     int size = res_0.sg_rule_list_size();
@@ -234,8 +238,9 @@ static int cidr_to_protobuf(const string &in, string *out) {
         *w += c;
     }
 
-    if (!address.length() || !mask.length())
+    if (!address.length() || !mask.length()) {
         return 1;
+    }
     *out = string(
         "address: \"" + address + "\""
         "mask_size: " + mask);
@@ -282,8 +287,9 @@ int RuleAddOptions::parse(int argc, char **argv) {
             string p = string(argv[i + 1]);
             try {
                 int pi = stoi(p);
-                if (pi < 0 || pi > 65535)
+                if (pi < 0 || pi > 65535) {
                     throw exception();
+                }
                 has_port_start = true;
                 port_start = pi;
                 has_port_end = true;
@@ -296,8 +302,9 @@ int RuleAddOptions::parse(int argc, char **argv) {
             string p = string(argv[i + 1]);
             try {
                 int pi = stoi(p);
-                if (pi < 0 || pi > 65535)
+                if (pi < 0 || pi > 65535) {
                     throw;
+                }
                 has_port_start = true;
                 port_start = pi;
             } catch (exception &e) {
@@ -308,8 +315,9 @@ int RuleAddOptions::parse(int argc, char **argv) {
             string p = string(argv[i + 1]);
             try {
                 int pi = stoi(p);
-                if (pi < 0 || pi > 65535)
+                if (pi < 0 || pi > 65535) {
                     throw;
+                }
                 has_port_end = true;
                 port_end = pi;
             } catch (exception &e) {
@@ -395,13 +403,15 @@ static int sub_sg_rule_add(int argc, char **argv,
         "        rule {"
         "          direction: " + o.direction +
         "          protocol: " + to_string(o.proto);
-    if (o.has_port_start)
+    if (o.has_port_start) {
         req += "   port_start: " + to_string(o.port_start) +
                "   port_end: " + to_string(o.port_end);
-    if (o.cidr.length())
+    }
+    if (o.cidr.length()) {
         req += "   cidr { " + o.cidr + " }";
-    else if (o.sg_members.length())
+    } else if (o.sg_members.length()) {
         req += "   security_group: \"" + o.sg_members + "\"";
+    }
     req +=
         "        }"
         "      }"
@@ -410,8 +420,9 @@ static int sub_sg_rule_add(int argc, char **argv,
         "}";
 
     proto::Messages res;
-    if (request(req, &res, options, false) || check_request_result(res))
+    if (request(req, &res, options, false) || check_request_result(res)) {
         return 1;
+    }
     return 0;
 }
 
@@ -447,8 +458,9 @@ static int sub_sg_rule_del(int argc, char **argv,
         "}";
 
     proto::Messages res;
-    if (request(req, &res, options, false) || check_request_result(res))
+    if (request(req, &res, options, false) || check_request_result(res)) {
         return 1;
+    }
 
     MessageV0_Response res_0 = res.messages(0).message_0().response();
     int size = res_0.sg_rule_list_size();
@@ -545,8 +557,9 @@ static int sub_sg_member_list(int argc, char **argv,
        "}";
 
     proto::Messages res;
-    if (request(req, &res, options, false) || check_request_result(res))
+    if (request(req, &res, options, false) || check_request_result(res)) {
         return 1;
+    }
 
     MessageV0_Response res_0 = res.messages(0).message_0().response();
     int size = res_0.sg_member_list_size();

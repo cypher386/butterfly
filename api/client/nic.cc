@@ -40,8 +40,9 @@ static int sub_nic_list(int argc, char **argv, const GlobalOptions &options) {
         "}";
 
     proto::Messages res;
-    if (request(req, &res, options, false) || check_request_result(res))
+    if (request(req, &res, options, false) || check_request_result(res)) {
         return 1;
+    }
 
     MessageV0_Response res_0 = res.messages(0).message_0().response();
     int size = res_0.nic_list_size();
@@ -79,8 +80,9 @@ static int sub_nic_stats(int argc, char **argv, const GlobalOptions &options) {
         "}";
 
     proto::Messages res;
-    if (request(req, &res, options, false) || check_request_result(res))
+    if (request(req, &res, options, false) || check_request_result(res)) {
         return 1;
+    }
 
     MessageV0_Response res_0 = res.messages(0).message_0().response();
     if (!res_0.has_nic_stats()) {
@@ -123,8 +125,9 @@ static int sub_nic_details(int argc, char **argv,
         "}";
 
     proto::Messages res;
-    if (request(req, &res, options, false) || check_request_result(res))
+    if (request(req, &res, options, false) || check_request_result(res)) {
         return 1;
+    }
 
     MessageV0_Response res_0 = res.messages(0).message_0().response();
     if (res_0.nic_details_size() == 0) {
@@ -136,13 +139,16 @@ static int sub_nic_details(int argc, char **argv,
     cout << "id: " << details.id() << endl;
     cout << "mac: " << details.mac() << endl;
     cout << "vni: " << to_string(details.vni()) << endl;
-    for (int i = 0; i < details.ip_size(); i++)
+    for (int i = 0; i < details.ip_size(); i++) {
         cout << "ip: " << details.ip(i) << endl;
-    if (details.has_ip_anti_spoof())
+    }
+    if (details.has_ip_anti_spoof()) {
         cout << "antispoof: " <<
             (details.ip_anti_spoof() ? "true" : "false") << endl;
-    if (details.has_sniff_target_nic_id())
+    }
+    if (details.has_sniff_target_nic_id()) {
         cout << "sniff target: " << details.sniff_target_nic_id() << endl;
+    }
     return 0;
 }
 
@@ -159,8 +165,9 @@ static int sg_list(string nic, vector<string> *list,
         "}";
 
     proto::Messages res;
-    if (request(req, &res, options, false) || check_request_result(res))
+    if (request(req, &res, options, false) || check_request_result(res)) {
         return 1;
+    }
 
     MessageV0_Response res_0 = res.messages(0).message_0().response();
     if (res_0.nic_details_size() == 0) {
@@ -170,8 +177,9 @@ static int sg_list(string nic, vector<string> *list,
 
     MessageV0_Nic details = res_0.nic_details(0);
     int size = details.security_group_size();
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < size; i++) {
         list->push_back(details.security_group(i));
+    }
     return 0;
 }
 
@@ -215,10 +223,12 @@ static int sub_nic_sg_list(int argc, char **argv,
     }
     string nic = string(argv[4]);
     vector<string> all_sg;
-    if (sg_list(nic, &all_sg, options))
+    if (sg_list(nic, &all_sg, options)) {
         return 1;
-    for (string sg : all_sg)
+    }
+    for (string sg : all_sg) {
         cout << sg << endl;
+    }
     return 0;
 }
 
@@ -244,8 +254,9 @@ static int sub_nic_sg_add(int argc, char **argv,
     vector<string> to_add;
     for (int i = 5; i < argc; i++) {
         string a = string(argv[i]);
-        if (a[0] == '-')
+        if (a[0] == '-') {
             break;
+        }
         to_add.push_back(a);
     }
     if (!to_add.size()) {
@@ -254,8 +265,9 @@ static int sub_nic_sg_add(int argc, char **argv,
     }
 
     vector<string> all_sg;
-    if (sg_list(nic, &all_sg, options))
+    if (sg_list(nic, &all_sg, options)) {
         return 1;
+    }
 
     // merge existing list with new list
     uint32_t old_size = all_sg.size();
@@ -293,8 +305,9 @@ static int sub_nic_sg_del(int argc, char **argv,
     vector<string> to_del;
     for (int i = 5; i < argc; i++) {
         string a = string(argv[i]);
-        if (a[0] == '-')
+        if (a[0] == '-') {
             break;
+        }
         to_del.push_back(a);
     }
     if (!to_del.size()) {
@@ -303,14 +316,16 @@ static int sub_nic_sg_del(int argc, char **argv,
     }
 
     vector<string> all_sg;
-    if (sg_list(nic, &all_sg, options))
+    if (sg_list(nic, &all_sg, options)) {
         return 1;
+    }
 
     vector<string> new_sg;
     for (string sg : all_sg) {
         auto r = find(to_del.begin(), to_del.end(), sg);
-        if (r == to_del.end())
+        if (r == to_del.end()) {
             new_sg.push_back(sg);
+        }
     }
 
     if (new_sg.size() == all_sg.size()) {
@@ -357,20 +372,21 @@ NicAddOptions::NicAddOptions() {
 
 int NicAddOptions::parse(int argc, char **argv) {
     for (int i = 1; i < argc; i++) {
-        if (i + 1 < argc && (string(argv[i]) == "--ip"))
+        if (i + 1 < argc && (string(argv[i]) == "--ip")) {
             ips.push_back(string(argv[i + 1]));
-        else if (i + 1 < argc && (string(argv[i]) == "--sg"))
+        } else if (i + 1 < argc && (string(argv[i]) == "--sg")) {
             sgs.push_back(string(argv[i + 1]));
-        else if (i + 1 < argc && (string(argv[i]) == "--mac"))
+        } else if (i + 1 < argc && (string(argv[i]) == "--mac")) {
             mac = string(argv[i + 1]);
-        else if (string(argv[i]) == "--enable-antispoof")
+        } else if (string(argv[i]) == "--enable-antispoof") {
             enable_antispoof = "true";
-        else if (i + 1 < argc && (string(argv[i]) == "--id"))
+        } else if (i + 1 < argc && (string(argv[i]) == "--id")) {
             id = string(argv[i + 1]);
-        else if (i + 1 < argc && (string(argv[i]) == "--vni"))
+        } else if (i + 1 < argc && (string(argv[i]) == "--vni")) {
             vni = string(argv[i + 1]);
-        else if (string(argv[i]) == "--bypass-filtering")
+        } else if (string(argv[i]) == "--bypass-filtering") {
             bypass_filtering = "true";
+        }
     }
     return !mac.length() || !id.length() || !vni.length();
 }
@@ -412,10 +428,12 @@ static int sub_nic_add(int argc, char **argv, const GlobalOptions &options) {
         "        id: \"" + o.id + "\""
         "        mac: \"" + o.mac + "\""
         "        vni: " + o.vni;
-    for (string ip : o.ips)
+    for (string ip : o.ips) {
         req += " ip: \"" + ip + "\"";
-    for (string sg : o.sgs)
+    }
+    for (string sg : o.sgs) {
         req += " security_group: \"" + sg + "\"";
+    }
     req +=
         "        ip_anti_spoof: " + o.enable_antispoof +
         "        bypass_filtering: " + o.bypass_filtering +
@@ -425,8 +443,9 @@ static int sub_nic_add(int argc, char **argv, const GlobalOptions &options) {
         "}";
 
     proto::Messages res;
-    if (request(req, &res, options, false) || check_request_result(res))
+    if (request(req, &res, options, false) || check_request_result(res)) {
         return 1;
+    }
 
     MessageV0_Response res_0 = res.messages(0).message_0().response();
     if (!res_0.has_nic_add() || !res_0.nic_add().has_path()) {
@@ -458,8 +477,9 @@ static int sub_nic_del(int argc, char **argv,
     vector<string> nics;
     for (int i = 3; i < argc; i++) {
         string a = string(argv[i]);
-        if (a[0] == '-')
+        if (a[0] == '-') {
             break;
+        }
         nics.push_back(a);
     }
     if (!nics.size()) {

@@ -23,8 +23,9 @@ RequestOptions::RequestOptions() {
 
 void RequestOptions::parse(int argc, char **argv) {
     for (int i = 1; i < argc; i++) {
-        if (string(argv[i]) == "--stdout")
+        if (string(argv[i]) == "--stdout") {
             to_stdout = true;
+        }
     }
 }
 
@@ -140,10 +141,11 @@ int check_request_result(const proto::Messages &res) {
 
     if (res.messages(0).has_error()) {
         cerr << "error in response: ";
-        if (!res.messages(0).error().has_code())
+        if (!res.messages(0).error().has_code()) {
             cerr << "no error code";
-        else
+        } else {
             cerr << Error_Code_Name(res.messages(0).error().code());
+        }
         cerr << endl;
         return 1;
     }

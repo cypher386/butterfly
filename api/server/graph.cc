@@ -91,8 +91,9 @@ void Graph::stop() {
     struct RpcQueue *a;
     std::map<std::string, app::Nic>::iterator n_it;
 
-    if (!started)
+    if (!started) {
         return;
+    }
 
     // Remove all NICs
     for (n_it = app::model.nics.begin();
@@ -214,8 +215,9 @@ bool Graph::start(std::string dpdk_args) {
 }
 
 void Graph::set_config_mtu() {
-    if (app::config.nic_mtu.length() == 0)
+    if (app::config.nic_mtu.length() == 0) {
         goto exit;
+    }
 
     if (app::config.nic_mtu == "max") {
         app::log.info("try to find maximal MTU");
@@ -298,8 +300,9 @@ void *Graph::poller(void *graph) {
         }
 
         /* Poll all pollable vhosts. */
-        if (pg_brick_poll(nic, &pkts_count, &app::pg_error) < 0)
+        if (pg_brick_poll(nic, &pkts_count, &app::pg_error) < 0) {
             PG_ERROR_(app::pg_error);
+        }
         for (uint32_t v = 0; v < size; v++) {
             if (pg_brick_poll(list->pollables[v],
                               &pkts_count, &app::pg_error) < 0) {
@@ -311,8 +314,9 @@ void *Graph::poller(void *graph) {
         /* Call firewall garbage callector. */
         if (FIREWALL_GC(cnt)) {
             cnt = 0;
-            for (uint32_t v = 0; v < size; v++)
+            for (uint32_t v = 0; v < size; v++) {
                 pg_firewall_gc(list->firewalls[v]);
+            }
             usleep(5);
         }
     }
@@ -327,8 +331,9 @@ int Graph::set_cpu(int core_id) {
     cpu_set_t cpu_set;
     pthread_t t;
 
-    if (core_id < 0 || core_id >= get_nprocs())
+    if (core_id < 0 || core_id >= get_nprocs()) {
         return EINVAL;
+    }
 
     t = pthread_self();
     CPU_ZERO(&cpu_set);
@@ -366,13 +371,15 @@ bool Graph::poller_update(struct RpcQueue **list) {
                 pg_vhost_stop();
                 break;
             case LINK:
-                if (pg_brick_link(a->link.w, a->link.e, &app::pg_error) < 0)
+                if (pg_brick_link(a->link.w, a->link.e, &app::pg_error) < 0) {
                     PG_ERROR_(app::pg_error);
+                }
                 break;
             case UNLINK:
                 pg_brick_unlink(a->unlink.b, &app::pg_error);
-                if (pg_error_is_set(&app::pg_error))
+                if (pg_error_is_set(&app::pg_error)) {
                     PG_ERROR_(app::pg_error);
+                }
                 break;
             case ADD_VNI:
                 if (isVtep6_) {
@@ -380,15 +387,17 @@ bool Graph::poller_update(struct RpcQueue **list) {
                                         a->add_vni.neighbor,
                                         a->add_vni.vni,
                                         a->add_vni.multicast_ip6,
-                                        &app::pg_error) < 0)
+                                        &app::pg_error) < 0) {
                         PG_ERROR_(app::pg_error);
+                    }
                 } else {
                     if (pg_vtep_add_vni(a->add_vni.vtep,
                                         a->add_vni.neighbor,
                                         a->add_vni.vni,
                                         a->add_vni.multicast_ip4,
-                                        &app::pg_error) < 0)
+                                        &app::pg_error) < 0) {
                         PG_ERROR_(app::pg_error);
+                    }
                 }
                 break;
             case UPDATE_POLL:
@@ -399,15 +408,17 @@ bool Graph::poller_update(struct RpcQueue **list) {
                 break;
             case FW_RELOAD:
                 if (pg_firewall_reload(a->fw_reload.firewall,
-                                       &app::pg_error) < 0)
+                                       &app::pg_error) < 0) {
                     PG_ERROR_(app::pg_error);
+                }
                 break;
             case FW_NEW:
                 *(a->fw_new.result) = pg_firewall_new(a->fw_new.name,
                                                       a->fw_new.flags,
                                                       &app::pg_error);
-                if (pg_error_is_set(&app::pg_error))
+                if (pg_error_is_set(&app::pg_error)) {
                     PG_ERROR_(app::pg_error);
+                }
                 break;
             case BRICK_DESTROY:
                 pg_brick_destroy(a->brick_destroy.b);
@@ -440,8 +451,9 @@ std::string Graph::nic_add(const app::Nic &nic) {
         std::pair<uint32_t, struct GraphVni> p(nic.vni, v);
         vnis_.insert(p);
         it = vnis_.find(nic.vni);
-        if (it == vnis_.end())
+        if (it == vnis_.end()) {
             return "";
+        }
     }
     struct GraphVni &vni = it->second;
 
@@ -476,8 +488,9 @@ std::string Graph::nic_add(const app::Nic &nic) {
             uint32_t ip;
             inet_pton(AF_INET, it->str().c_str(), &ip);
             if (pg_antispoof_arp_add(gn.antispoof.get(),
-                                     ip, &app::pg_error) < 0)
+                                     ip, &app::pg_error) < 0) {
                 PG_ERROR_(app::pg_error);
+            }
         }
         pg_antispoof_arp_enable(gn.antispoof.get());
     }
@@ -574,8 +587,9 @@ std::string Graph::nic_add(const app::Nic &nic) {
     app::set_cgroup();
 
     const char *ret = pg_vhost_socket_path(gn.vhost.get(), &app::pg_error);
-    if (!ret)
+    if (!ret) {
         PG_ERROR_(app::pg_error);
+    }
     return std::string(ret);
 }
 
@@ -616,8 +630,9 @@ void Graph::nic_del(const app::Nic &nic) {
         // - re-add other head to vni
         // - destroy the switch
         auto it = vni.nics.begin();
-        if (it->second.id == nic.id)
+        if (it->second.id == nic.id) {
             it++;
+        }
         struct GraphNic &other = it->second;
         unlink(vni.sw);
         link(app::graph.vtep_, other.head);
@@ -637,8 +652,9 @@ void Graph::nic_del(const app::Nic &nic) {
     vni.nics.erase(nic_it);
 
     // Remove empty vni
-    if (vni.nics.empty())
+    if (vni.nics.empty()) {
         vnis_.erase(vni.vni);
+    }
 }
 
 std::string Graph::nic_export(const app::Nic &nic) {
@@ -706,8 +722,9 @@ void Graph::nic_config_anti_spoof(const app::Nic &nic, bool enable) {
             uint32_t ip;
             inet_pton(AF_INET, it->str().c_str(), &ip);
             if (pg_antispoof_arp_add(antispoof.get(),
-                                     ip, &app::pg_error) < 0)
+                                     ip, &app::pg_error) < 0) {
                 PG_ERROR_(app::pg_error);
+            }
         }
         pg_antispoof_arp_enable(antispoof.get());
     } else {
@@ -717,8 +734,9 @@ void Graph::nic_config_anti_spoof(const app::Nic &nic, bool enable) {
 
 std::string Graph::fw_build_rule(const app::Rule &rule) {
     // Note that we only take into account inbound rules
-    if (rule.direction == app::Rule::OUTBOUND)
+    if (rule.direction == app::Rule::OUTBOUND) {
         return "";
+    }
 
     std::string r;
 
@@ -745,8 +763,9 @@ std::string Graph::fw_build_rule(const app::Rule &rule) {
             for (auto ip = sg->second.members.begin();
                  ip != sg->second.members.end();) {
                 r += " src host " + ip->str();
-                if (++ip != sg->second.members.end())
+                if (++ip != sg->second.members.end()) {
                     r += " or";
+                }
             }
             r += ")";
         } else {
@@ -812,8 +831,9 @@ std::string Graph::fw_build_sg(const app::Sg &sg) {
             continue;
         }
         r += "(" + fw_rule + ")";
-        if (++it != sg.rules.end())
+        if (++it != sg.rules.end()) {
             r += "||";
+        }
     }
     // Special case when last rule is empty
     if (r.back() == '|') {
@@ -837,11 +857,13 @@ void Graph::fw_update(const app::Nic &nic) {
 
     // Get firewall brick
     auto itvni = vnis_.find(nic.vni);
-    if (itvni == vnis_.end())
+    if (itvni == vnis_.end()) {
         return;
+    }
     auto itnic = itvni->second.nics.find(nic.id);
-    if (itnic == itvni->second.nics.end())
+    if (itnic == itvni->second.nics.end()) {
         return;
+    }
     BrickShrPtr &fw = itnic->second.firewall;
 
     // For each security groups, build rules inside a BIG one
@@ -859,8 +881,9 @@ void Graph::fw_update(const app::Nic &nic) {
             continue;
         }
         in_rules += "(" + fw_build_sg(sit->second) + ")";
-        if (++it != nic.security_groups.end())
+        if (++it != nic.security_groups.end()) {
             in_rules += "||";
+        }
     }
     // Special case when last rule is empty
     if (in_rules.back() == '|') {
@@ -872,8 +895,9 @@ void Graph::fw_update(const app::Nic &nic) {
     std::string out_rules;
     for (auto it = nic.ip_list.begin(); it != nic.ip_list.end();) {
         out_rules += "(src host " + it->str() + ")";
-        if (++it != nic.ip_list.end())
+        if (++it != nic.ip_list.end()) {
             out_rules += " || ";
+        }
     }
 
     // Allow DHCP to exit
@@ -1035,10 +1059,11 @@ void Graph::add_vni(BrickShrPtr vtep, BrickShrPtr neighbor, uint32_t vni) {
     a->add_vni.vtep = vtep.get();
     a->add_vni.neighbor = neighbor.get();
     a->add_vni.vni = vni;
-    if (!isVtep6_)
+    if (!isVtep6_) {
         a->add_vni.multicast_ip4 = build_multicast_ip4(vni);
-    else
+    } else {
         build_multicast_ip6(a->add_vni.multicast_ip6, vni);
+    }
     g_async_queue_push(queue_, a);
 }
 
@@ -1063,8 +1088,9 @@ void Graph::update_poll() {
                 LOG_ERROR_("Not enough pollable bricks slot available");
                 break;
             }
-            if (!nic_it->second.enable)
+            if (!nic_it->second.enable) {
                 continue;
+            }
             p.pollables[p.size] = nic_it->second.vhost.get();
             p.firewalls[p.size] = nic_it->second.firewall.get();
             p.size++;
@@ -1076,6 +1102,7 @@ void Graph::update_poll() {
 }
 
 void Graph::wait_empty_queue() {
-    while (g_async_queue_length_unlocked(queue_) > 0)
+    while (g_async_queue_length_unlocked(queue_) > 0) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
 }
