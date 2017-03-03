@@ -52,8 +52,8 @@ Config::Config() {
 
 bool Config::parse_cmd(int argc, char **argv) {
     bool ret = true;
-    bool show_version;
-    bool dpdk_help;
+    bool showVersion;
+    bool dpdkHelp;
 
     auto gfree = [](gchar *p) { g_free(p); };
     std::unique_ptr<gchar, decltype(gfree)> config_path_cmd(nullptr, gfree);
@@ -77,7 +77,7 @@ bool Config::parse_cmd(int argc, char **argv) {
         {"log-level", 'l', 0, G_OPTION_ARG_STRING, &log_level_cmd,
          "Log level to use. LOG_LEVEL can be 'none', 'error' (default), " \
          "'warning', 'info' or 'debug'", "LOG_LEVEL"},
-        {"version", 'V', 0, G_OPTION_ARG_NONE, &show_version,
+        {"version", 'V', 0, G_OPTION_ARG_NONE, &showVersion,
          "Show butterflyd version and exit", nullptr},
         {"socket-dir", 's', 0, G_OPTION_ARG_FILENAME, &socket_folder_cmd,
          "Create network sockets in specified directory", "DIR"},
@@ -86,7 +86,7 @@ bool Config::parse_cmd(int argc, char **argv) {
          "ID"},
         {"packet-trace", 't', 0, G_OPTION_ARG_NONE, &config.packet_trace,
          "Trace packets going through Butterfly", nullptr},
-        {"dpdk-help", 0, 0, G_OPTION_ARG_NONE, &dpdk_help,
+        {"dpdk-help", 0, 0, G_OPTION_ARG_NONE, &dpdkHelp,
          "print DPDK help", nullptr},
         {"dpdk-args", 0, 0, G_OPTION_ARG_STRING, &dpdk_args_cmd,
          "set dpdk arguments (default='" DPDK_DEFAULT_ARGS "'", nullptr},
@@ -116,7 +116,7 @@ bool Config::parse_cmd(int argc, char **argv) {
         return false;
     }
 
-    if (dpdk_help) {
+    if (dpdkHelp) {
         dpdk_args = "--help";
         app::graph.start(dpdk_args);
         app::graph.stop();
@@ -124,7 +124,7 @@ bool Config::parse_cmd(int argc, char **argv) {
     }
 
     // Ask for version number ?
-    if (show_version) {
+    if (showVersion) {
         std::cout << VERSION_INFO << std::endl;
         return false;
     }
@@ -150,7 +150,7 @@ bool Config::parse_cmd(int argc, char **argv) {
         nic_mtu = std::atoi(&*dpdk_port_cmd);
 
     // Load from configuration file if provided
-    if (config_path.length() > 0 && !load_config_file(config_path)) {
+    if (config_path.length() > 0 && !LoadConfigFile(config_path)) {
         std::cerr << "Failed to open configuration file" << std::endl;
         app::log.error("Failed to open configuration file");
         return false;
@@ -162,7 +162,7 @@ bool Config::parse_cmd(int argc, char **argv) {
     return ret;
 }
 
-bool Config::missing_mandatory() {
+bool Config::MissingMandatory() {
     bool ret = false;
     if (external_ip.length() == 0) {
         std::cerr << "IP to use is not set" << std::endl;
@@ -183,7 +183,7 @@ bool Config::missing_mandatory() {
 
 Log::Log() {
     // Set default log level
-    set_log_level("error");
+    SetLogLevel("error");
 
     // Openlog
     open();
@@ -198,7 +198,7 @@ void Log::open() {
             LOG_LOCAL0);
 }
 
-bool Log::set_log_level(std::string level) {
+bool Log::SetLogLevel(std::string level) {
     if (level == "none") {
         setlogmask(0);
     } else if (level == "error") {
@@ -210,7 +210,7 @@ bool Log::set_log_level(std::string level) {
     } else if (level == "debug") {
         setlogmask(LOG_UPTO(LOG_DEBUG));
     } else {
-        error("Log::set_log_level: non existing log level");
+        error("Log::SetLogLevel: non existing log level");
         return false;
     }
     return true;
@@ -259,7 +259,7 @@ void Log::error(const std::string &message, ...) {
 
 #undef DEBUG_INTERNAL
 
-bool load_config_file(std::string config_path) {
+bool LoadConfigFile(std::string config_path) {
     CSimpleIniA ini;
     ini.SetUnicode();
     if (ini.LoadFile(config_path.c_str()) != SI_OK) {
@@ -270,7 +270,7 @@ bool load_config_file(std::string config_path) {
     v = ini.GetValue("general", "log-level", "_");
     if (std::string(v) != "_") {
         config.log_level = v;
-        log.set_log_level(config.log_level);
+        log.SetLogLevel(config.log_level);
         std::string m = "LoadConfig: get log-level from config: " +
             config.log_level;
         log.debug(m);
@@ -335,19 +335,19 @@ bool load_config_file(std::string config_path) {
     return true;
 }
 
-void signal_register() {
-    signal(SIGINT, signal_handler);
-    signal(SIGQUIT, signal_handler);
-    signal(SIGSTOP, signal_handler);
+void SignalRegister() {
+    signal(SIGINT, SignalHandler);
+    signal(SIGQUIT, SignalHandler);
+    signal(SIGSTOP, SignalHandler);
 }
 
-void signal_handler(int signum) {
+void SignalHandler(int signum) {
     std::string m = "got signal " + std::to_string(signum);
     app::log.info(m);
     app::request_exit = true;
 }
 
-std::string graph_dot(struct pg_brick *brick) {
+std::string GraphDot(struct pg_brick *brick) {
     char buf[10000];
     FILE *fd = fmemopen(buf, 10000, "w+");
     if (pg_brick_dot(brick, fd, &pg_error) < 0) {
@@ -392,7 +392,7 @@ struct pg_error *pg_error;
 
 }  // namespace app
 
-int init_cgroup(int multiplier) {
+int InitCgroup(int multiplier) {
   system("mkdir /sys/fs/cgroup/cpu/butterfly");
   system(std::string("echo $(( `cat /sys/fs/cgroup/cpu/cpu.shares` * "
                      + std::to_string(multiplier)
@@ -401,7 +401,7 @@ int init_cgroup(int multiplier) {
   return 0;
 }
 
-void app::set_cgroup() {
+void app::SetCgroup() {
   if (!app::config.tid) {
     return;
   }
@@ -420,7 +420,7 @@ void app::set_cgroup() {
   system(unsetOtherStr.c_str());
 }
 
-void app::destroy_cgroup() {
+void app::DestroyCgroup() {
   system("cat /sys/fs/cgroup/cpu/butterfly/tasks |"
          " while read ligne; do echo $ligne > /sys/fs/cgroup/cpu/tasks ; done");
   system("rmdir /sys/fs/cgroup/cpu/butterfly");
@@ -430,7 +430,7 @@ int
 main(int argc, char *argv[]) {
     try {
         // Register signals
-        app::signal_register();
+        app::SignalRegister();
 
         // Check parameters
         if (!app::config.parse_cmd(argc, argv)) {
@@ -438,10 +438,10 @@ main(int argc, char *argv[]) {
         }
 
         // Set log level from options
-        app::log.set_log_level(app::config.log_level);
+        app::log.SetLogLevel(app::config.log_level);
 
         // Ready to start ?
-        if (app::config.missing_mandatory()) {
+        if (app::config.MissingMandatory()) {
             std::cerr << "Some arguments are missing, please check " \
             "configuration or use --help" << std::endl;
             return 0;
@@ -454,10 +454,10 @@ main(int argc, char *argv[]) {
             app::log.error("cannot start packetgraph, exiting");
             app::request_exit = true;
         }
-        init_cgroup(POLL_THREAD_MULTIPLIER);
+        InitCgroup(POLL_THREAD_MULTIPLIER);
         // Prepare & run API server
-        APIServer server(app::config.api_endpoint, &app::request_exit);
-        server.run_threaded();
+        ApiServer server(app::config.api_endpoint, &app::request_exit);
+        server.RunThreaded();
 
         while (!app::request_exit) {
             std::this_thread::sleep_for(std::chrono::seconds(1));

@@ -48,27 +48,27 @@ class Graph {
     /** Inject a NIC in packetgraph including all needed bricks
      * @param  nic model and informations of the NIC.
      */
-    std::string nic_add(const app::Nic &nic);
+    std::string NicAdd(const app::Nic &nic);
     /** Remove a NIC from the graph with related dependencies.
      * @param  id NIC id to delete.
      */
-    void nic_del(const app::Nic &nic);
+    void NicDel(const app::Nic &nic);
     /** Get a snapshot containing the current firewall state attached to the NIC.
      * @param  id id of the NIC attached to the firewall.
      * @return an opaque string containing firewall's state data.
      */
-    std::string nic_export(const app::Nic &nic);
+    std::string NicExport(const app::Nic &nic);
     /** Get NIC statistics.
      * @param  id id of the NIC
      * @param  in number of bytes who has been received by the NIC
      * @param  out number of bytes who has been transmitted by the NIC
      */
-    void nic_get_stats(const app::Nic &nic, uint64_t *in, uint64_t *out);
+    void NicGetStats(const app::Nic &nic, uint64_t *in, uint64_t *out);
     /** Enable on disable IP antispoof on the NIC.
      * @param  id id of the NIC
      * @param  enable true to enable IP antispoof, false otherwise
      */
-    void nic_config_anti_spoof(const app::Nic &nic, bool enable);
+    void NicConfigAntiSpoof(const app::Nic &nic, bool enable);
     /** Rebuild all firewall rules of a NIC
      * @param  nic model of the NIC
      */
@@ -77,7 +77,7 @@ class Graph {
      * @param  nic nic model
      * @param  rule model of the rule
      */
-    void fw_add_rule(const app::Nic &nic, const app::Rule &rule);
+    void FwAddRule(const app::Nic &nic, const app::Rule &rule);
     /** Build a graphic description in dot language (graphviz project).
      * @return  a string describing the whole graph
      */
@@ -174,7 +174,7 @@ class Graph {
                 uint64_t flags,
                 struct pg_brick **result);
     void brick_destroy(BrickShrPtr b);
-    void wait_empty_queue();
+    void WaitEmptyQueue();
 
     /** Threaded function to poll graph. */
     static void *poller(void *g);
@@ -183,32 +183,32 @@ class Graph {
      * Set scheduler affinity so the current thread only run a on a
      * specific CPU.
      */
-    static inline int set_cpu(int core_id);
-    static inline int set_sched();
+    static inline int SetCpu(int core_id);
+    static inline int SetSched();
 
     /* Set physical nic MTU from config. */
-    inline void set_config_mtu();
+    inline void SetConfigMtu();
 
     /**
      * Called by the poller, run all pending actions in the queue
      * @param    list list of bricks the poller needs (struct RpcUpdatePoll)
      * @return  true if poller must continue polling, otherwhise exit.
      */
-    inline bool poller_update(struct RpcQueue **list);
+    inline bool PollerUpdate(struct RpcQueue **list);
 
     /**
      * Build a rule string based on a rule model
      * @param   a list of security groups to apply
      * @return  return a pcap filter string of the rule
      */
-    std::string fw_build_rule(const app::Rule &rule);
+    std::string FwBuildRule(const app::Rule &rule);
 
     /**
      * Build a big rule string based on a security group
      * @param   a list of security groups to apply
      * @return  return a pcap filter rule of the whole SG
      */
-    std::string fw_build_sg(const app::Sg &sg);
+    std::string FwBuildSg(const app::Sg &sg);
 
     /**
      * Try to link @eastBrick to @westBrick, and add @sniffer betwin those

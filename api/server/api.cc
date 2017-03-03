@@ -28,7 +28,7 @@
 #include "api/protocol/message.pb.h"
 #include "api/version.h"
 
-void API::process_request(const std::string &request, std::string *response) {
+void Api::ProcessRequest(const std::string &request, std::string *response) {
     if (response == nullptr) {
         return;
     }
@@ -84,7 +84,7 @@ void API::process_request(const std::string &request, std::string *response) {
     app::log.debug(human_message);
 }
 
-void API::build_internal_error(std::string *response) {
+void Api::BuildInternalError(std::string *response) {
     proto::Message rep;
     google::protobuf::TextFormat::Printer printer;
     std::string human_message;
@@ -97,7 +97,7 @@ void API::build_internal_error(std::string *response) {
     app::log.debug(human_message);
 }
 
-void API::dispatch(const proto::Message &req, proto::Message *rep) {
+void Api::dispatch(const proto::Message &req, proto::Message *rep) {
     if (rep == nullptr) {
         return;
     }
@@ -109,7 +109,7 @@ void API::dispatch(const proto::Message &req, proto::Message *rep) {
         rep->set_allocated_message_0(new MessageV0);
         auto req_0 = req.message_0();
         auto rep_0 = rep->mutable_message_0();
-        API_0::process(req_0, rep_0);
+        Api0::process(req_0, rep_0);
     } else {
         LOG_ERROR_("message version not supported");
         rep->set_allocated_error(new proto::Error);
@@ -117,7 +117,7 @@ void API::dispatch(const proto::Message &req, proto::Message *rep) {
     }
 }
 
-bool API::action_nic_add(const app::Nic &nic, std::string *path,
+bool Api::ActionNicAdd(const app::Nic &nic, std::string *path,
     app::Error *error) {
     auto it = app::model.nics.find(nic.id);
     // Do we already have this NIC ?
@@ -125,14 +125,14 @@ bool API::action_nic_add(const app::Nic &nic, std::string *path,
         std::string m = "NIC already exists with id " + nic.id;
         app::log.warning(m);
         // Disable NIC in packetgraph
-        app::graph.nic_del(it->second);
+        app::graph.NicDel(it->second);
         // Remove NIC from model
         app::model.nics.erase(nic.id);
         // Retry !
-        return API::action_nic_add(nic, path, error);
+        return Api::ActionNicAdd(nic, path, error);
     }
 
-    *path = app::graph.nic_add(nic);
+    *path = app::graph.NicAdd(nic);
 
     // Add NIC in model
     std::pair<std::string, app::Nic> p(nic.id, nic);
@@ -140,7 +140,7 @@ bool API::action_nic_add(const app::Nic &nic, std::string *path,
     return !!path->size();
 }
 
-bool API::action_nic_update(const API::NicUpdate &update,
+bool Api::ActionNicUpdate(const Api::NicUpdate &update,
     app::Error *error) {
     // Do we have this NIC ?
     auto itn = app::model.nics.find(update.id);
@@ -181,7 +181,7 @@ bool API::action_nic_update(const API::NicUpdate &update,
     }
 
     if (need_anti_spoof_update) {
-        app::graph.nic_config_anti_spoof(n, n.ip_anti_spoof);
+        app::graph.NicConfigAntiSpoof(n, n.ip_anti_spoof);
     }
 
     if (need_fw_update) {
@@ -191,7 +191,7 @@ bool API::action_nic_update(const API::NicUpdate &update,
     return true;
 }
 
-bool API::action_nic_del(std::string id, app::Error *error) {
+bool Api::ActionNicDel(std::string id, app::Error *error) {
     auto nic = app::model.nics.find(id);
     // Do we have this NIC ?
     if (nic == app::model.nics.end()) {
@@ -200,7 +200,7 @@ bool API::action_nic_del(std::string id, app::Error *error) {
         return true;
     }
 
-    app::graph.nic_del(nic->second);
+    app::graph.NicDel(nic->second);
 
     // Remove NIC from model
     app::model.nics.erase(id);
@@ -209,7 +209,7 @@ bool API::action_nic_del(std::string id, app::Error *error) {
 }
 
 
-bool API::action_nic_export(std::string id, std::string *data,
+bool Api::ActionNicExport(std::string id, std::string *data,
     app::Error *error) {
     if (data == nullptr) {
         return false;
@@ -225,12 +225,12 @@ bool API::action_nic_export(std::string id, std::string *data,
         return false;
     }
 
-    *data = app::graph.nic_export(nic->second);
+    *data = app::graph.NicExport(nic->second);
 
     return true;
 }
 
-bool API::action_nic_stats(std::string id, uint64_t *in, uint64_t *out,
+bool Api::ActionNicStats(std::string id, uint64_t *in, uint64_t *out,
     app::Error *error) {
     if (in == nullptr || out == nullptr) {
         return false;
@@ -246,11 +246,11 @@ bool API::action_nic_stats(std::string id, uint64_t *in, uint64_t *out,
         return false;
     }
 
-    app::graph.nic_get_stats(nic->second, in, out);
+    app::graph.NicGetStats(nic->second, in, out);
     return true;
 }
 
-void API::sg_update(const app::Sg &sg) {
+void Api::SgUpdate(const app::Sg &sg) {
     std::map<std::string, app::Nic>::iterator it;
     std::vector<std::string>::iterator sg_it;
     auto found = false;
@@ -273,7 +273,7 @@ void API::sg_update(const app::Sg &sg) {
     }
 }
 
-void API::sg_update(const app::Sg &sg, const app::Rule &rule) {
+void Api::SgUpdate(const app::Sg &sg, const app::Rule &rule) {
     std::map<std::string, app::Nic>::iterator it;
     std::vector<std::string>::iterator sg_it;
     auto found = false;
@@ -284,7 +284,7 @@ void API::sg_update(const app::Sg &sg, const app::Rule &rule) {
              sg_it != nic.security_groups.end();
              sg_it++) {
             if (*sg_it == sg.id) {
-                app::graph.fw_add_rule(nic, rule);
+                app::graph.FwAddRule(nic, rule);
                 found = true;
             }
         }
@@ -296,7 +296,7 @@ void API::sg_update(const app::Sg &sg, const app::Rule &rule) {
     }
 }
 
-void API::sg_update_rule_members(const app::Sg &modified_sg) {
+void Api::SgUpdateRuleMembers(const app::Sg &modified_sg) {
     std::map<std::string, app::Nic>::iterator it;
     std::map<std::string, app::Nic>::iterator it_end;
     std::vector<std::string>::iterator sg_it;
@@ -325,7 +325,7 @@ void API::sg_update_rule_members(const app::Sg &modified_sg) {
                     std::find(updated_sgs.begin(),
                               updated_sgs.end(),
                               sg->second.id) == updated_sgs.end()) {
-                    sg_update(sg->second);
+                    SgUpdate(sg->second);
                     updated_sgs.push_back(sg->second.id);
                     found = true;
                     break;
@@ -340,7 +340,7 @@ void API::sg_update_rule_members(const app::Sg &modified_sg) {
     }
 }
 
-bool API::action_sg_add(const app::Sg &sg, app::Error *error) {
+bool Api::ActionSgAdd(const app::Sg &sg, app::Error *error) {
     auto itn = app::model.security_groups.find(sg.id);
 
     // Do we already have this security group ?
@@ -359,12 +359,12 @@ bool API::action_sg_add(const app::Sg &sg, app::Error *error) {
         app::model.security_groups.insert(p);
     }
 
-    sg_update(sg);
-    sg_update_rule_members(sg);
+    SgUpdate(sg);
+    SgUpdateRuleMembers(sg);
     return true;
 }
 
-bool API::action_sg_del(std::string id, app::Error *error) {
+bool Api::ActionSgDel(std::string id, app::Error *error) {
     auto m = app::model.security_groups.find(id);
     if (m == app::model.security_groups.end()) {
         std::string m = "Security group does not exist with this id " + id;
@@ -375,12 +375,12 @@ bool API::action_sg_del(std::string id, app::Error *error) {
     app::Sg sg = m->second;
     app::model.security_groups.erase(id);
     // Update graph
-    sg_update(sg);
-    sg_update_rule_members(sg);
+    SgUpdate(sg);
+    SgUpdateRuleMembers(sg);
     return true;
 }
 
-bool API::action_sg_rule_add(std::string sg_id, const app::Rule &rule,
+bool Api::ActionSgRuleAdd(std::string sg_id, const app::Rule &rule,
     app::Error *error) {
     // Do we have this security group ?
     auto m = app::model.security_groups.find(sg_id);
@@ -393,7 +393,7 @@ bool API::action_sg_rule_add(std::string sg_id, const app::Rule &rule,
         std::pair<std::string, app::Sg> p(sg_id, nsg);
         app::model.security_groups.insert(p);
         // Try again
-        return API::action_sg_rule_add(sg_id, rule, error);
+        return Api::ActionSgRuleAdd(sg_id, rule, error);
     }
 
     app::Sg &sg = m->second;
@@ -414,11 +414,11 @@ bool API::action_sg_rule_add(std::string sg_id, const app::Rule &rule,
     sg.rules.insert(p);
 
     // Update graph
-    sg_update(sg, rule);
+    SgUpdate(sg, rule);
     return true;
 }
 
-bool API::action_sg_rule_del(std::string sg_id, const app::Rule &rule,
+bool Api::ActionSgRuleDel(std::string sg_id, const app::Rule &rule,
     app::Error *error) {
     // Do we have this security group ?
     auto m = app::model.security_groups.find(sg_id);
@@ -447,11 +447,11 @@ bool API::action_sg_rule_del(std::string sg_id, const app::Rule &rule,
     sg.rules.erase(h);
 
     // Update graph
-    sg_update(sg);
+    SgUpdate(sg);
     return true;
 }
 
-bool API::action_sg_member_add(std::string sg_id, const app::Ip &ip,
+bool Api::ActionSgMemberAdd(std::string sg_id, const app::Ip &ip,
     app::Error *error) {
     // Do we have this security group ?
     auto m = app::model.security_groups.find(sg_id);
@@ -485,11 +485,11 @@ bool API::action_sg_member_add(std::string sg_id, const app::Ip &ip,
     sg.members.push_back(ip);
 
     // Update graph
-    sg_update_rule_members(sg);
+    SgUpdateRuleMembers(sg);
     return true;
 }
 
-bool API::action_sg_member_del(std::string sg_id, const app::Ip &ip,
+bool Api::ActionSgMemberDel(std::string sg_id, const app::Ip &ip,
     app::Error *error) {
     // Do we have this security group ?
     auto m = app::model.security_groups.find(sg_id);
@@ -513,15 +513,15 @@ bool API::action_sg_member_del(std::string sg_id, const app::Ip &ip,
     sg.members.erase(res);
 
     // Update graph
-    sg_update_rule_members(sg);
+    SgUpdateRuleMembers(sg);
     return true;
 }
 
-std::string API::action_graph_dot() {
+std::string Api::ActionGraphDot() {
     return app::graph.dot();
 }
 
-void API::action_app_quit() {
+void Api::ActionAppQuit() {
     app::request_exit = true;
 }
 

@@ -22,20 +22,20 @@ extern "C" {
 #include "api/server/app.h"
 #include "api/server/api.h"
 
-APIServer::APIServer(std::string zmq_endpoint, bool *end_trigger) {
+ApiServer::ApiServer(std::string zmq_endpoint, bool *end_trigger) {
     endpoint_ = zmq_endpoint;
     end_ = end_trigger;
     prepare();
 }
 
 void
-APIServer::run_threaded() {
-    std::thread t(static_loop, this);
+ApiServer::RunThreaded() {
+    std::thread t(StaticLoop, this);
     t.detach();
 }
 
 void
-APIServer::loop() {
+ApiServer::loop() {
     try {
         zmqpp::message request;
         zmqpp::message response;
@@ -55,7 +55,7 @@ APIServer::loop() {
 }
 
 void
-APIServer::run() {
+ApiServer::run() {
     while (42) {
         loop();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -66,7 +66,7 @@ APIServer::run() {
 }
 
 void
-APIServer::prepare() {
+ApiServer::prepare() {
     socket_ = std::make_shared < zmqpp::socket >(
         context_,
         zmqpp::socket_type::reply);
@@ -79,14 +79,14 @@ APIServer::prepare() {
 }
 
 void
-APIServer::static_loop(APIServer *me) {
+ApiServer::StaticLoop(ApiServer *me) {
     if (me != NULL) {
         me->run();
     }
 }
 
 void
-APIServer::process(const zmqpp::message &req, zmqpp::message *res) {
+ApiServer::process(const zmqpp::message &req, zmqpp::message *res) {
     // Extract message from ZMQ
     LOG_DEBUG_("unpack request from a ZMQ message");
     std::string request_string = req.get(0);
@@ -94,10 +94,10 @@ APIServer::process(const zmqpp::message &req, zmqpp::message *res) {
     // Process request
     std::string response_string;
     try {
-        API::process_request(request_string, &response_string);
+        Api::ProcessRequest(request_string, &response_string);
     } catch (std::exception &e) {
         LOG_ERROR_("internal error: %s", e.what());
-        API::build_internal_error(&response_string);
+        Api::BuildInternalError(&response_string);
     }
 
     // Pack message in ZMQ

@@ -53,7 +53,7 @@ void GlobalOptions::parse(int argc, char **argv) {
     }
 }
 
-void global_parameter_help(void) {
+void GlobalParameterHelp(void) {
         cout << endl <<
         "global options:" << endl <<
         "    --endpoint, -e  endpoint to use (default: " <<
@@ -74,7 +74,7 @@ static void help(void) {
         "options:" << endl <<
         "    --version, -V   show butterfly version" << endl <<
         "    --help, -h      show this help" << endl;
-        global_parameter_help();
+        GlobalParameterHelp();
 }
 
 int main(int argc, char **argv) {
@@ -98,15 +98,15 @@ int main(int argc, char **argv) {
 
     string cmd = string(argv[1]);
     if (cmd == "nic") {
-        return sub_nic(argc, argv, options);
+        return SubNic(argc, argv, options);
     } else if (cmd == "sg") {
-        return sub_sg(argc, argv, options);
+        return SubSg(argc, argv, options);
     } else if (cmd == "status") {
         return sub_status(argc, argv, options);
     } else if (cmd == "shutdown") {
         return sub_shutdown(argc, argv, options);
     } else if (cmd == "request") {
-        return sub_request(argc, argv, options);
+        return SubRequest(argc, argv, options);
     } else {
         cerr << "invalid subcommand " << cmd << endl;
         help();

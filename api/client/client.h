@@ -100,12 +100,12 @@ struct RuleAddOptions {
     string sg_members;
 };
 
-void global_parameter_help(void);
-int sub_sg(int argc, char **argv, const GlobalOptions &options);
-int sub_nic(int argc, char **argv, const GlobalOptions &options);
+void GlobalParameterHelp(void);
+int SubSg(int argc, char **argv, const GlobalOptions &options);
+int SubNic(int argc, char **argv, const GlobalOptions &options);
 int sub_status(int argc, char **argv, const GlobalOptions &options);
 int sub_shutdown(int argc, char **argv, const GlobalOptions &options);
-int sub_request(int argc, char **argv, const GlobalOptions &options);
+int SubRequest(int argc, char **argv, const GlobalOptions &options);
 int sub_status(int argc, char **argv, const GlobalOptions &options);
 int request(const proto::Messages &request,
             proto::Messages *response,
@@ -115,6 +115,6 @@ int request(const string &req,
             proto::Messages *res,
             const GlobalOptions &options,
             bool response_to_stdout);
-int check_request_result(const proto::Messages &res);
+int CheckRequestResult(const proto::Messages &res);
 
 #endif  // API_CLIENT_CLIENT_H_

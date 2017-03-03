@@ -34,10 +34,10 @@ static void help(void) {
         "usage: butterfly request REQUEST_FILE [options...]" << endl << endl <<
         "options:" << endl <<
         "    --stdout   prints protobuf response to stdout" << endl;
-        global_parameter_help();
+        GlobalParameterHelp();
 }
 
-int sub_request(int argc, char **argv, const GlobalOptions &options) {
+int SubRequest(int argc, char **argv, const GlobalOptions &options) {
     if (argc <= 2) {
         help();
         return 1;
@@ -133,7 +133,7 @@ int request(const string &req,
     return request(proto_req, res, options, response_to_stdout);
 }
 
-int check_request_result(const proto::Messages &res) {
+int CheckRequestResult(const proto::Messages &res) {
     if (res.messages_size() == 0) {
         cerr << "error: no message in response" << endl;
         return 1;

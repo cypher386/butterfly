@@ -60,7 +60,7 @@ namespace app {
 struct Config {
     Config();
     bool parse_cmd(int argc, char **argv);
-    bool missing_mandatory();
+    bool MissingMandatory();
     std::string external_ip;
     std::string config_path;
     std::string api_endpoint;
@@ -84,7 +84,7 @@ class Log {
  public:
     Log();
     ~Log();
-    bool set_log_level(std::string level);
+    bool SetLogLevel(std::string level);
     void debug(const char *message, ...);
     void debug(const std::string &message, ...);
     void info(const char *message, ...);
@@ -101,16 +101,16 @@ class Log {
 };
 
 // Manage signals
-void signal_register();
-void signal_handler(int signum);
+void SignalRegister();
+void SignalHandler(int signum);
 
 // Manage configuration file
-bool load_config_file(std::string config_path);
+bool LoadConfigFile(std::string config_path);
 
-void destroy_cgroup();
-void set_cgroup();
+void DestroyCgroup();
+void SetCgroup();
 
-std::string graph_dot(struct pg_brick *brick);
+std::string GraphDot(struct pg_brick *brick);
 bool pg_start(std::string dpdk_args);
 
 // Some global app:: variables

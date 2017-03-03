@@ -22,7 +22,7 @@ extern "C" {
 #include "api/server/api.h"
 #include "api/server/app.h"
 
-void API_0::process(const MessageV0 &req, MessageV0 *res) {
+void Api0::process(const MessageV0 &req, MessageV0 *res) {
     if (res == nullptr) {
         return;
     }
@@ -35,136 +35,136 @@ void API_0::process(const MessageV0 &req, MessageV0 *res) {
 
     auto rs = res->mutable_response();
     if (!req.has_request()) {
-        build_nok_res(rs, "MessageV0 appears to not have any request inside");
+        BuildNokRes(rs, "MessageV0 appears to not have any request inside");
         return;
     }
 
     auto rq = req.request();
     if (rq.has_nic_add()) {
-        nic_add(rq, rs);
+        NicAdd(rq, rs);
     } else if (rq.has_nic_update()) {
-        nic_update(rq, rs);
+        NicUpdate(rq, rs);
     } else if (rq.has_nic_del()) {
-        nic_del(rq, rs);
+        NicDel(rq, rs);
     } else if (rq.has_nic_list()) {
-        nic_list(rq, rs);
+        NicList(rq, rs);
     } else if (rq.has_nic_details()) {
-        nic_details(rq, rs);
+        NicDetails(rq, rs);
     } else if (rq.has_nic_export()) {
-        nic_export(rq, rs);
+        NicExport(rq, rs);
     } else if (rq.has_nic_stats()) {
-        nic_stats(rq, rs);
+        NicStats(rq, rs);
     } else if (rq.has_sg_add()) {
-        sg_add(rq, rs);
+        SgAdd(rq, rs);
     } else if (rq.has_sg_del()) {
-        sg_del(rq, rs);
+        SgDel(rq, rs);
     } else if (rq.has_sg_list()) {
-        sg_list(rq, rs);
+        SgList(rq, rs);
     } else if (rq.has_sg_rule_add()) {
-        sg_rule_add(rq, rs);
+        SgRuleAdd(rq, rs);
     } else if (rq.has_sg_rule_del()) {
-        sg_rule_del(rq, rs);
+        SgRuleDel(rq, rs);
     } else if (rq.has_sg_rule_list()) {
-        sg_rule_list(rq, rs);
+        SgRuleList(rq, rs);
     } else if (rq.has_sg_member_add()) {
-        sg_member_add(rq, rs);
+        SgMemberAdd(rq, rs);
     } else if (rq.has_sg_member_del()) {
-        sg_member_del(rq, rs);
+        SgMemberDel(rq, rs);
     } else if (rq.has_sg_member_list()) {
-        sg_member_list(rq, rs);
+        SgMemberList(rq, rs);
     } else if (rq.has_app_status()) {
-        app_status(rq, rs);
+        AppStatus(rq, rs);
     } else if (rq.has_app_quit()) {
-        app_quit(rq, rs);
+        AppQuit(rq, rs);
     } else if (rq.has_app_config()) {
-        app_config(rq, rs);
+        AppConfig(rq, rs);
     } else {
-        build_nok_res(rs, "MessageV0 appears to not have any request");
+        BuildNokRes(rs, "MessageV0 appears to not have any request");
     }
 }
 
-void API_0::nic_add(const MessageV0_Request &req, MessageV0_Response *res) {
+void Api0::NicAdd(const MessageV0_Request &req, MessageV0_Response *res) {
     if (res == nullptr) {
         return;
     }
     app::log.info("NIC added");
     auto n = req.nic_add();
-    if (!validate_nic(n)) {
-        build_nok_res(res, "Bad NIC format");
+    if (!ValidateNic(n)) {
+        BuildNokRes(res, "Bad NIC format");
         return;
     }
 
     app::Nic nic;
     if (!convert(n, &nic)) {
-        build_nok_res(res, "Internal error");
+        BuildNokRes(res, "Internal error");
         return;
     }
 
     app::Error error;
     std::string path;
-    if (!action_nic_add(nic, &path, &error)) {
-        build_nok_res(res, error);
+    if (!ActionNicAdd(nic, &path, &error)) {
+        BuildNokRes(res, error);
         return;
     }
 
     res->set_allocated_nic_add(new MessageV0_NicAddRes);
     res->mutable_nic_add()->set_path(path);
-    build_ok_res(res);
+    BuildOkRes(res);
 }
 
-void API_0::nic_update(const MessageV0_Request &req,
+void Api0::NicUpdate(const MessageV0_Request &req,
     MessageV0_Response *res) {
     if (res == nullptr) {
         return;
     }
     app::log.info("NIC updated");
     auto n = req.nic_update();
-    if (!validate_nic_update(n)) {
-        build_nok_res(res, "Bad Nic update format");
+    if (!ValidateNicUpdate(n)) {
+        BuildNokRes(res, "Bad Nic update format");
         return;
     }
 
-    API::NicUpdate nic_update;
+    Api::NicUpdate nic_update;
     if (!convert(n, &nic_update)) {
-        build_nok_res(res, "Internal error");
+        BuildNokRes(res, "Internal error");
         return;
     }
 
     app::Error error;
-    if (!action_nic_update(nic_update, &error)) {
-        build_nok_res(res, error);
+    if (!ActionNicUpdate(nic_update, &error)) {
+        BuildNokRes(res, error);
         return;
     }
 
-    build_ok_res(res);
+    BuildOkRes(res);
 }
 
-void API_0::nic_del(const MessageV0_Request &req, MessageV0_Response *res) {
+void Api0::NicDel(const MessageV0_Request &req, MessageV0_Response *res) {
     if (res == nullptr) {
         return;
     }
     app::log.info("NIC deletion");
     app::Error error;
-    if (!action_nic_del(req.nic_del(), &error)) {
-        build_nok_res(res, error);
+    if (!ActionNicDel(req.nic_del(), &error)) {
+        BuildNokRes(res, error);
         return;
     }
-    build_ok_res(res);
+    BuildOkRes(res);
 }
 
-void API_0::nic_list(const MessageV0_Request &req, MessageV0_Response *res) {
+void Api0::NicList(const MessageV0_Request &req, MessageV0_Response *res) {
     if (res == nullptr) {
         return;
     }
     app::log.info("NIC listing");
-    build_ok_res(res);
+    BuildOkRes(res);
     app::Model &m = app::model;
     for (auto it=m.nics.begin(); it != m.nics.end(); it++) {
         res->add_nic_list(it->second.id);
     }
 }
 
-void API_0::nic_details(const MessageV0_Request &req,
+void Api0::NicDetails(const MessageV0_Request &req,
     MessageV0_Response *res) {
     if (res == nullptr) {
         return;
@@ -176,30 +176,30 @@ void API_0::nic_details(const MessageV0_Request &req,
     if (id.length() > 0) {
         auto it = m.nics.find(id);
         if (it == m.nics.end()) {
-            build_nok_res(res, "NIC not found");
+            BuildNokRes(res, "NIC not found");
             return;
         }
 
         auto n = res->add_nic_details();
         if (!convert(it->second, n)) {
-            build_nok_res(res, "Internal error");
+            BuildNokRes(res, "Internal error");
             return;
         }
-        build_ok_res(res);
+        BuildOkRes(res);
         return;
     }
     // Details of all NICs
     for (auto it=m.nics.begin(); it != m.nics.end(); it++) {
         auto n = res->add_nic_details();
         if (!convert(it->second, n)) {
-            build_nok_res(res, "Internal error");
+            BuildNokRes(res, "Internal error");
             return;
         }
     }
-    build_ok_res(res);
+    BuildOkRes(res);
 }
 
-void API_0::nic_export(const MessageV0_Request &req,
+void Api0::NicExport(const MessageV0_Request &req,
     MessageV0_Response *res) {
     if (res == nullptr) {
         return;
@@ -208,8 +208,8 @@ void API_0::nic_export(const MessageV0_Request &req,
     std::string nic_id = req.nic_export();
     std::string nic_data;
     app::Error err;
-    if (!action_nic_export(nic_id, &nic_data, &err)) {
-        build_nok_res(res, err);
+    if (!ActionNicExport(nic_id, &nic_data, &err)) {
+        BuildNokRes(res, err);
         return;
     }
     res->set_allocated_nic_export(new MessageV0_NicExportRes);
@@ -219,10 +219,10 @@ void API_0::nic_export(const MessageV0_Request &req,
     auto fw_data = nic_data_res->mutable_fw_data();
 
     fw_data->set_data(nic_data);
-    build_ok_res(res);
+    BuildOkRes(res);
 }
 
-void API_0::nic_stats(const MessageV0_Request &req,
+void Api0::NicStats(const MessageV0_Request &req,
     MessageV0_Response *res) {
     if (res == nullptr) {
         return;
@@ -231,8 +231,8 @@ void API_0::nic_stats(const MessageV0_Request &req,
     std::string nic_id = req.nic_stats();
     uint64_t in, out = 0;
     app::Error err;
-    if (!action_nic_stats(nic_id, &in, &out, &err)) {
-        build_nok_res(res, err);
+    if (!ActionNicStats(nic_id, &in, &out, &err)) {
+        BuildNokRes(res, err);
         return;
     }
 
@@ -241,36 +241,36 @@ void API_0::nic_stats(const MessageV0_Request &req,
 
     nic_stats->set_in(in);
     nic_stats->set_out(out);
-    build_ok_res(res);
+    BuildOkRes(res);
 }
 
-void API_0::sg_add(const MessageV0_Request &req, MessageV0_Response *res) {
+void Api0::SgAdd(const MessageV0_Request &req, MessageV0_Response *res) {
     if (res == nullptr) {
         return;
     }
     app::log.info("Security Group add");
     auto s = req.sg_add();
 
-    if (!validate_sg(s)) {
-        build_nok_res(res, "Bad Security Group format");
+    if (!ValidateSg(s)) {
+        BuildNokRes(res, "Bad Security Group format");
         return;
     }
 
     app::Sg sg;
     if (!convert(s, &sg)) {
-        build_nok_res(res, "Internal error");
+        BuildNokRes(res, "Internal error");
         return;
     }
 
     app::Error error;
-    if (!action_sg_add(sg, &error)) {
-        build_nok_res(res, error);
+    if (!ActionSgAdd(sg, &error)) {
+        BuildNokRes(res, error);
     } else {
-        build_ok_res(res);
+        BuildOkRes(res);
     }
 }
 
-void API_0::sg_del(const MessageV0_Request &req, MessageV0_Response *res) {
+void Api0::SgDel(const MessageV0_Request &req, MessageV0_Response *res) {
     if (res == nullptr) {
         return;
     }
@@ -278,14 +278,14 @@ void API_0::sg_del(const MessageV0_Request &req, MessageV0_Response *res) {
     std::string sg_id = req.sg_del();
 
     app::Error error;
-    if (!action_sg_del(sg_id, &error)) {
-        build_nok_res(res, error);
+    if (!ActionSgDel(sg_id, &error)) {
+        BuildNokRes(res, error);
     } else {
-        build_ok_res(res);
+        BuildOkRes(res);
     }
 }
 
-void API_0::sg_list(const MessageV0_Request &req, MessageV0_Response *res) {
+void Api0::SgList(const MessageV0_Request &req, MessageV0_Response *res) {
     if (res == nullptr) {
         return;
     }
@@ -296,10 +296,10 @@ void API_0::sg_list(const MessageV0_Request &req, MessageV0_Response *res) {
         auto id = res->add_sg_list();
         *id = it->second.id;
     }
-    build_ok_res(res);
+    BuildOkRes(res);
 }
 
-void API_0::sg_rule_add(const MessageV0_Request &req,
+void Api0::SgRuleAdd(const MessageV0_Request &req,
     MessageV0_Response *res) {
     if (res == nullptr) {
         return;
@@ -307,54 +307,54 @@ void API_0::sg_rule_add(const MessageV0_Request &req,
     app::log.info("Security Group rule add");
     auto rule_req = req.sg_rule_add();
     auto r = rule_req.rule();
-    if (!validate_sg_rule(r)) {
-        build_nok_res(res, "Bad Security Group rule format");
+    if (!ValidateSgRule(r)) {
+        BuildNokRes(res, "Bad Security Group rule format");
         return;
     }
 
     std::string sg_id = rule_req.sg_id();
     app::Rule rule;
     if (!convert(r, &rule)) {
-        build_nok_res(res, "Internal error");
+        BuildNokRes(res, "Internal error");
         return;
     }
 
     app::Error error;
-    if (!action_sg_rule_add(sg_id, rule, &error)) {
-        build_nok_res(res, error);
+    if (!ActionSgRuleAdd(sg_id, rule, &error)) {
+        BuildNokRes(res, error);
     } else {
-        build_ok_res(res);
+        BuildOkRes(res);
     }
 }
 
-void API_0::sg_rule_del(const MessageV0_Request &req, MessageV0_Response *res) {
+void Api0::SgRuleDel(const MessageV0_Request &req, MessageV0_Response *res) {
     if (res == nullptr) {
         return;
     }
     app::log.info("Security Group rule deletion");
     auto rule_req = req.sg_rule_del();
     auto r = rule_req.rule();
-    if (!validate_sg_rule(r)) {
-        build_nok_res(res, "Bad Security Group rule format");
+    if (!ValidateSgRule(r)) {
+        BuildNokRes(res, "Bad Security Group rule format");
         return;
     }
 
     std::string sg_id = rule_req.sg_id();
     app::Rule rule;
     if (!convert(r, &rule)) {
-        build_nok_res(res, "Internal error");
+        BuildNokRes(res, "Internal error");
         return;
     }
 
     app::Error error;
-    if (!action_sg_rule_del(sg_id, rule, &error)) {
-        build_nok_res(res, error);
+    if (!ActionSgRuleDel(sg_id, rule, &error)) {
+        BuildNokRes(res, error);
     } else {
-        build_ok_res(res);
+        BuildOkRes(res);
     }
 }
 
-void API_0::sg_rule_list(const MessageV0_Request &req,
+void Api0::SgRuleList(const MessageV0_Request &req,
     MessageV0_Response *res) {
     if (res == nullptr) {
         return;
@@ -364,7 +364,7 @@ void API_0::sg_rule_list(const MessageV0_Request &req,
     app::Model &m = app::model;
 
     if (m.security_groups.find(sg_id) == m.security_groups.end()) {
-        build_nok_res(res, "Security Group not found");
+        BuildNokRes(res, "Security Group not found");
         return;
     }
 
@@ -373,15 +373,15 @@ void API_0::sg_rule_list(const MessageV0_Request &req,
     for (auto it=sg.rules.begin(); it != sg.rules.end(); it++) {
         auto r = res->add_sg_rule_list();
         if (!convert(it->second, r)) {
-            build_nok_res(res, "Internal error");
+            BuildNokRes(res, "Internal error");
             return;
         }
     }
 
-    build_ok_res(res);
+    BuildOkRes(res);
 }
 
-void API_0::sg_member_add(const MessageV0_Request &req,
+void Api0::SgMemberAdd(const MessageV0_Request &req,
     MessageV0_Response *res) {
     if (res == nullptr) {
         return;
@@ -389,27 +389,27 @@ void API_0::sg_member_add(const MessageV0_Request &req,
     app::log.info("Security Group member add");
     auto member_req = req.sg_member_add();
     auto i = member_req.member();
-    if (!validate_ip(i)) {
-        build_nok_res(res, "Bad IP format");
+    if (!ValidateIp(i)) {
+        BuildNokRes(res, "Bad IP format");
         return;
     }
 
     std::string sg_id = member_req.sg_id();
     app::Ip ip;
     if (!convert(i, &ip)) {
-        build_nok_res(res, "Internal error");
+        BuildNokRes(res, "Internal error");
         return;
     }
 
     app::Error error;
-    if (!action_sg_member_add(sg_id, ip, &error)) {
-        build_nok_res(res, error);
+    if (!ActionSgMemberAdd(sg_id, ip, &error)) {
+        BuildNokRes(res, error);
     } else {
-        build_ok_res(res);
+        BuildOkRes(res);
     }
 }
 
-void API_0::sg_member_del(const MessageV0_Request &req,
+void Api0::SgMemberDel(const MessageV0_Request &req,
     MessageV0_Response *res) {
     if (res == nullptr) {
         return;
@@ -417,27 +417,27 @@ void API_0::sg_member_del(const MessageV0_Request &req,
     app::log.info("Security Group member deletion");
     auto member_req = req.sg_member_del();
     auto i = member_req.member();
-    if (!validate_ip(i)) {
-        build_nok_res(res, "Bad IP format");
+    if (!ValidateIp(i)) {
+        BuildNokRes(res, "Bad IP format");
         return;
     }
 
     std::string sg_id = member_req.sg_id();
     app::Ip ip;
     if (!convert(i, &ip)) {
-        build_nok_res(res, "Internal error");
+        BuildNokRes(res, "Internal error");
         return;
     }
 
     app::Error error;
-    if (!action_sg_member_del(sg_id, ip, &error)) {
-        build_nok_res(res, error);
+    if (!ActionSgMemberDel(sg_id, ip, &error)) {
+        BuildNokRes(res, error);
     } else {
-        build_ok_res(res);
+        BuildOkRes(res);
     }
 }
 
-void API_0::sg_member_list(const MessageV0_Request &req,
+void Api0::SgMemberList(const MessageV0_Request &req,
     MessageV0_Response *res) {
     if (res == nullptr) {
         return;
@@ -447,7 +447,7 @@ void API_0::sg_member_list(const MessageV0_Request &req,
     app::Model &m = app::model;
 
     if (m.security_groups.find(sg_id) == m.security_groups.end()) {
-        build_nok_res(res, "Security Group not found");
+        BuildNokRes(res, "Security Group not found");
         return;
     }
 
@@ -456,38 +456,39 @@ void API_0::sg_member_list(const MessageV0_Request &req,
     for (auto it=sg.members.begin(); it != sg.members.end(); it++) {
         auto m = res->add_sg_member_list();
         if (!convert(*it, m)) {
-            build_nok_res(res, "Internal error");
+            BuildNokRes(res, "Internal error");
             return;
         }
     }
-    build_ok_res(res);
+    BuildOkRes(res);
 }
 
-void API_0::app_status(const MessageV0_Request &req,
+void Api0::AppStatus(const MessageV0_Request &req,
     MessageV0_Response *res) {
     if (res == nullptr) {
         return;
+    }
     app::log.info("Application status");
     res->set_allocated_app_status(new MessageV0_AppStatusRes);
     auto a = res->mutable_app_status();
     a->set_start_date(app::stats.start_date);
     a->set_current_date(time(NULL));
     a->set_request_counter(app::stats.request_counter);
-    a->set_graph_dot(action_graph_dot());
+    a->set_graph_dot(ActionGraphDot());
 
-    build_ok_res(res);
+    BuildOkRes(res);
 }
 
-void API_0::app_quit(const MessageV0_Request &req, MessageV0_Response *res) {
+void Api0::AppQuit(const MessageV0_Request &req, MessageV0_Response *res) {
     if (res == nullptr) {
         return;
     }
     app::log.info("Application quit");
-    action_app_quit();
-    build_ok_res(res);
+    ActionAppQuit();
+    BuildOkRes(res);
 }
 
-void API_0::app_config(const MessageV0_Request &req, MessageV0_Response *res) {
+void Api0::AppConfig(const MessageV0_Request &req, MessageV0_Response *res) {
     if (res == nullptr) {
         return;
     }
@@ -495,20 +496,20 @@ void API_0::app_config(const MessageV0_Request &req, MessageV0_Response *res) {
     auto config = req.app_config();
     std::string err;
     if (config.has_log_level()) {
-        if (!app::log.set_log_level(config.log_level())) {
+        if (!app::log.SetLogLevel(config.log_level())) {
             err = err + "log level: failed ";
         }
     }
 
     if (err.length() == 0) {
-        build_ok_res(res);
+        BuildOkRes(res);
     } else {
         err = "Application configuration failed: " + err;
-        build_nok_res(res, err);
+        BuildNokRes(res, err);
     }
 }
 
-void API_0::build_ok_res(MessageV0_Response *res) {
+void Api0::BuildOkRes(MessageV0_Response *res) {
     if (res == nullptr) {
         return;
     }
@@ -516,7 +517,7 @@ void API_0::build_ok_res(MessageV0_Response *res) {
     s->set_status(true);
 }
 
-void API_0::build_nok_res(MessageV0_Response *res) {
+void Api0::BuildNokRes(MessageV0_Response *res) {
     if (res == nullptr) {
         return;
     }
@@ -524,27 +525,27 @@ void API_0::build_nok_res(MessageV0_Response *res) {
     s->set_status(false);
 }
 
-void API_0::build_nok_res(MessageV0_Response *res, std::string description) {
+void Api0::BuildNokRes(MessageV0_Response *res, std::string description) {
     if (res == nullptr) {
         return;
     }
     LOG_DEBUG_("%s", description.c_str());
-    build_nok_res(res);
+    BuildNokRes(res);
     auto s = res->mutable_status();
     s->set_allocated_error(new MessageV0_Error);
     auto e = s->mutable_error();
     e->set_description(description);
 }
 
-void API_0::build_nok_res(MessageV0_Response *res, const char *description) {
+void Api0::BuildNokRes(MessageV0_Response *res, const char *description) {
     std::string d;
     if (description != nullptr) {
         d = description;
     }
-    build_nok_res(res, d);
+    BuildNokRes(res, d);
 }
 
-void API_0::build_nok_res(MessageV0_Response *res, const app::Error &error) {
+void Api0::BuildNokRes(MessageV0_Response *res, const app::Error &error) {
     if (res == nullptr) {
         return;
     }
@@ -554,14 +555,14 @@ void API_0::build_nok_res(MessageV0_Response *res, const app::Error &error) {
 
     if (!convert(error, e)) {
         s->release_error();
-        build_nok_res(res, "Internal Error");
+        BuildNokRes(res, "Internal Error");
     }
-    build_nok_res(res);
+    BuildNokRes(res);
 }
 
-bool API_0::validate_nic(const MessageV0_Nic &nic) {
+bool Api0::ValidateNic(const MessageV0_Nic &nic) {
     // Check MAC
-    if (!validate_mac(nic.mac())) {
+    if (!ValidateMac(nic.mac())) {
         return false;
     }
 
@@ -574,32 +575,32 @@ bool API_0::validate_nic(const MessageV0_Nic &nic) {
     // Check IP list
     for (int a = 0; a < nic.ip_size(); a++) {
         auto ip = nic.ip(a);
-        if (!validate_ip(ip)) {
+        if (!ValidateIp(ip)) {
             return false;
         }
     }
     return true;
 }
 
-bool API_0::validate_nic_update(const MessageV0_NicUpdateReq &nic_update) {
+bool Api0::ValidateNicUpdate(const MessageV0_NicUpdateReq &nic_update) {
     // Check IP list
     if (nic_update.ip_size() == 1 && nic_update.ip(0).length() == 0) {
         return true;
     }
     for (int a = 0; a < nic_update.ip_size(); a++) {
         auto ip = nic_update.ip(a);
-        if (!validate_ip(ip)) {
+        if (!ValidateIp(ip)) {
             return false;
         }
     }
     return true;
 }
 
-bool API_0::validate_sg(const MessageV0_Sg &sg) {
+bool Api0::ValidateSg(const MessageV0_Sg &sg) {
     // Check Members
     for (int a = 0; a < sg.member_size(); a++) {
         auto ip = sg.member(a);
-        if (!validate_ip(ip)) {
+        if (!ValidateIp(ip)) {
             return false;
         }
     }
@@ -607,14 +608,14 @@ bool API_0::validate_sg(const MessageV0_Sg &sg) {
     // Check Rules
     for (int a = 0; a < sg.rule_size(); a++) {
         auto rule = sg.rule(a);
-        if (!validate_sg_rule(rule)) {
+        if (!ValidateSgRule(rule)) {
             return false;
         }
     }
     return true;
 }
 
-bool API_0::validate_sg_rule(const MessageV0_Rule &rule) {
+bool Api0::ValidateSgRule(const MessageV0_Rule &rule) {
     // Check protocol
     int32_t protocol = rule.protocol();
     if (protocol < -1 || protocol > 255) {
@@ -652,7 +653,7 @@ bool API_0::validate_sg_rule(const MessageV0_Rule &rule) {
     // Validate CIDR
     if (rule.has_cidr()) {
         auto cidr = rule.cidr();
-        if (!validate_cidr(cidr)) {
+        if (!ValidateCidr(cidr)) {
             return false;
         }
     }
@@ -660,7 +661,7 @@ bool API_0::validate_sg_rule(const MessageV0_Rule &rule) {
     return true;
 }
 
-bool API_0::validate_ip(const std::string &ip) {
+bool Api0::ValidateIp(const std::string &ip) {
     struct in6_addr a6;
     struct in_addr a4;
     const char *s = ip.c_str();
@@ -671,7 +672,7 @@ bool API_0::validate_ip(const std::string &ip) {
     return true;
 }
 
-bool API_0::validate_mac(const std::string &mac) {
+bool Api0::ValidateMac(const std::string &mac) {
     if (mac.length() != 17) {
         return false;
     }
@@ -690,7 +691,7 @@ bool API_0::validate_mac(const std::string &mac) {
     return true;
 }
 
-bool API_0::validate_cidr(const MessageV0_Cidr &cidr) {
+bool Api0::ValidateCidr(const MessageV0_Cidr &cidr) {
     const char *ip = cidr.address().c_str();
     struct in6_addr a6;
     struct in_addr a4;
@@ -708,7 +709,7 @@ bool API_0::validate_cidr(const MessageV0_Cidr &cidr) {
     return true;
 }
 
-bool API_0::convert(const app::Nic &nic_model, MessageV0_Nic *nic_message) {
+bool Api0::convert(const app::Nic &nic_model, MessageV0_Nic *nic_message) {
     if (nic_message == nullptr) {
         return false;
     }
@@ -746,7 +747,7 @@ bool API_0::convert(const app::Nic &nic_model, MessageV0_Nic *nic_message) {
     return true;
 }
 
-bool API_0::convert(const MessageV0_Nic &nic_message, app::Nic *nic_model) {
+bool Api0::convert(const MessageV0_Nic &nic_message, app::Nic *nic_model) {
     if (nic_model == nullptr) {
         return false;
     }
@@ -800,8 +801,8 @@ bool API_0::convert(const MessageV0_Nic &nic_message, app::Nic *nic_model) {
     return true;
 }
 
-bool API_0::convert(const MessageV0_NicUpdateReq &nic_update_message,
-                    API::NicUpdate *nic_update_model) {
+bool Api0::convert(const MessageV0_NicUpdateReq &nic_update_message,
+                    Api::NicUpdate *nic_update_model) {
     if (nic_update_model == nullptr) {
         return false;
     }
@@ -853,7 +854,7 @@ bool API_0::convert(const MessageV0_NicUpdateReq &nic_update_message,
     return true;
 }
 
-bool API_0::convert(const app::Sg &sg_model, MessageV0_Sg *sg_message) {
+bool Api0::convert(const app::Sg &sg_model, MessageV0_Sg *sg_message) {
     if (sg_message == nullptr) {
         return false;
     }
@@ -878,7 +879,7 @@ bool API_0::convert(const app::Sg &sg_model, MessageV0_Sg *sg_message) {
     return true;
 }
 
-bool API_0::convert(const MessageV0_Sg &sg_message, app::Sg *sg_model) {
+bool Api0::convert(const MessageV0_Sg &sg_message, app::Sg *sg_model) {
     if (sg_model == nullptr) {
         return false;
     }
@@ -918,7 +919,7 @@ bool API_0::convert(const MessageV0_Sg &sg_message, app::Sg *sg_model) {
     return true;
 }
 
-bool API_0::convert(const app::Rule &rule_model,
+bool Api0::convert(const app::Rule &rule_model,
     MessageV0_Rule *rule_message) {
     if (rule_message == nullptr) {
         return false;
@@ -954,7 +955,7 @@ bool API_0::convert(const app::Rule &rule_model,
     return true;
 }
 
-bool API_0::convert(const MessageV0_Rule &rule_message, app::Rule *rule_model) {
+bool Api0::convert(const MessageV0_Rule &rule_message, app::Rule *rule_model) {
     if (rule_model == nullptr) {
         return false;
     }
@@ -987,7 +988,7 @@ bool API_0::convert(const MessageV0_Rule &rule_message, app::Rule *rule_model) {
     return true;
 }
 
-bool API_0::convert(const app::Ip &ip_model, std::string *ip_message) {
+bool Api0::convert(const app::Ip &ip_model, std::string *ip_message) {
     if (ip_message == nullptr) {
         return false;
     }
@@ -995,7 +996,7 @@ bool API_0::convert(const app::Ip &ip_model, std::string *ip_message) {
     return true;
 }
 
-bool API_0::convert(const std::string &ip_message, app::Ip *ip_model) {
+bool Api0::convert(const std::string &ip_message, app::Ip *ip_model) {
     if (ip_model == nullptr) {
         return false;
     }
@@ -1003,7 +1004,7 @@ bool API_0::convert(const std::string &ip_message, app::Ip *ip_model) {
     return true;
 }
 
-bool API_0::convert(const app::Mac &mac_model, std::string *mac_message) {
+bool Api0::convert(const app::Mac &mac_model, std::string *mac_message) {
     if (mac_message == nullptr) {
         return false;
     }
@@ -1011,7 +1012,7 @@ bool API_0::convert(const app::Mac &mac_model, std::string *mac_message) {
     return true;
 }
 
-bool API_0::convert(const std::string &mac_message, app::Mac *mac_model) {
+bool Api0::convert(const std::string &mac_message, app::Mac *mac_model) {
     if (mac_model == nullptr) {
         return false;
     }
@@ -1019,7 +1020,7 @@ bool API_0::convert(const std::string &mac_message, app::Mac *mac_model) {
     return true;
 }
 
-bool API_0::convert(const app::Cidr &cidr_model, MessageV0_Cidr *cidr_message) {
+bool Api0::convert(const app::Cidr &cidr_model, MessageV0_Cidr *cidr_message) {
     if (cidr_message == nullptr) {
         return false;
     }
@@ -1033,7 +1034,7 @@ bool API_0::convert(const app::Cidr &cidr_model, MessageV0_Cidr *cidr_message) {
     return true;
 }
 
-bool API_0::convert(const MessageV0_Cidr &cidr_message, app::Cidr *cidr_model) {
+bool Api0::convert(const MessageV0_Cidr &cidr_message, app::Cidr *cidr_model) {
     if (cidr_model == nullptr) {
         return false;
     }
@@ -1046,7 +1047,7 @@ bool API_0::convert(const MessageV0_Cidr &cidr_message, app::Cidr *cidr_model) {
     return true;
 }
 
-bool API_0::convert(const app::Error &error_model,
+bool Api0::convert(const app::Error &error_model,
     MessageV0_Error *error_message) {
     if (error_message == nullptr) {
         return false;
