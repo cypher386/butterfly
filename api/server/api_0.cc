@@ -495,10 +495,8 @@ void Api0::AppConfig(const MessageV0_Request &req, MessageV0_Response *res) {
     app::log.info("Application configuration");
     auto config = req.app_config();
     std::string err;
-    if (config.has_log_level()) {
-        if (!app::log.SetLogLevel(config.log_level())) {
+    if (config.has_log_level() && (!app::log.SetLogLevel(config.log_level()))) {
             err = err + "log level: failed ";
-        }
     }
 
     if (err.length() == 0) {
